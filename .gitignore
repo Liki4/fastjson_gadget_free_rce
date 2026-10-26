@@ -1,0 +1,17 @@
+# OS metadata
+.DS_Store
+
+# IDE state
+.idea/
+.vscode/
+*.iml
+
+# Build outputs
+target/
+out/
+/META-INF/MANIFEST.MF
+
+# Generated or downloaded binaries
+*.class
+*.jar
+exploit/probe

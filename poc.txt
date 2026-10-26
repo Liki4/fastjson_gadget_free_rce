@@ -1,0 +1,22 @@
+单次 JDK8 + Tomcat
+    http -> LaunchedURLClassLoader.getResourceAsStream -> retrieve -> 下载缓存 -> 是 JSONType
+         -> TypeUtils.loadClass -> TCCL=TomcatEmbeddedWebappClassLoader.loadClass
+         -> 父委托=Class.forName(name,false,parent) -> forName 拒绝 // -> 抛出 ClassNotFoundException -> parent.loadClass 未执行
+
+单次 JDK8 + Jetty/Undertow
+    http -> LaunchedURLClassLoader.getResourceAsStream -> retrieve -> 是 JSONType
+         -> TCCL=LaunchedURLClassLoader.loadClass -> findClass -> defineClass -> defineClass 允许 // -> 加载执行
+
+多次 全JDK + Tomcat
+    http -> LaunchedURLClassLoader.getResourceAsStream -> retrieve -> 下载缓存 -> /dev/fd/xxx
+         -> 无 @JSONType -> 不进 loadClass -> null 静默返回
+    file -> LaunchedURLClassLoader.getResourceAsStream -> 是 JSONType
+         -> TCCL=TomcatEmbeddedWebappClassLoader.loadClass -> Class.forName 委托
+         -> 无 // 通过 forName 检查 -> parent(LaunchedURLClassLoader).findClass -> defineClass -> 加载执行
+
+多次 全JDK + Jetty/Undertow
+    http -> LaunchedURLClassLoader.getResourceAsStream -> retrieve -> 下载缓存 -> /dev/fd/xxx
+         -> 无 @JSONType -> 不进 loadClass -> null 静默返回
+    file -> LaunchedURLClassLoader.getResourceAsStream -> 是 JSONType
+         -> TCCL=LaunchedURLClassLoader.loadClass
+         -> findClass -> defineClass -> defineClass 允许 / (只检查 ://) -> 加载执行
